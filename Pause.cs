@@ -3,9 +3,9 @@ using Neo.SmartContract.Framework;
 using Neo.SmartContract.Framework.Attributes;
 using Neo.SmartContract.Framework.Services;
 
-namespace GasFree
+namespace GasFreeForwarder
 {
-    partial class GasFree
+    partial class GasFreeForwarder
     {
         [Safe]
         public static bool IsPaused()

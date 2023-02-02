@@ -8,8 +8,9 @@ using System.Numerics;
 using Neo.SmartContract.Framework.Native;
 using Neo.Cryptography.ECC;
 
-namespace GasFree
+namespace GasFreeForwarder
 {
+    [Serializable]
     public struct NEP712Domain
     {
         public string name;
@@ -18,9 +19,11 @@ namespace GasFree
         public UInt160 verifyingContract;
     }
 
-    public struct MetaTransaction {
+    [Serializable]
+    public struct MetaTransaction
+    {
         public UInt160 from;
-        public ByteString signer;
+        public ByteString signer; // public key of the meta transaction signer
         public UInt160 to;
         public string function;
         public BigInteger deadline;
@@ -29,14 +32,17 @@ namespace GasFree
         public object data;
     }
 
-    [DisplayName("GasFree")]
+    [DisplayName("GasFreeForwarder")]
     [ManifestExtra("Author", "Jinghui Liao")]
     [ManifestExtra("Email", "jinghui@wayne.edu")]
-    [ManifestExtra("Description", "This is a gasfree contract for testing")]
+    [ManifestExtra("Description", "This is a gasfreeforwarder contract for testing")]
     [ContractPermission("*", "*")]
-    public partial class GasFree : SmartContract
+    public partial class GasFreeForwarder : SmartContract
     {
         private const string VERSION = "v0";
+        private const ulong CONSTANT_FEE = 21000;
+        private const ulong TRANSFER_FEE = 65000;
+
 
         [Safe]
         public static string Version() => VERSION;
@@ -76,7 +82,7 @@ namespace GasFree
             return CryptoLib.Sha256(
                 MAIL_TYPEHASH +
                 meta.from +
-                meta.signer+
+                meta.signer +
                 meta.to +
                 meta.function +
                 meta.deadline +
@@ -86,43 +92,45 @@ namespace GasFree
             );
         }
 
-        private static long _preExecution(BigInteger value, UInt160 contract){
-            Assert(value<=DepositStorage.Balance(contract), "Insufficient GAS balance.");
+        private static long _preExecution(BigInteger value, UInt160 contract)
+        {
+            Assert(value <= DepositStorage.Balance(contract), "Insufficient GAS balance.");
             return Runtime.GasLeft;
         }
 
 
-        private static bool _onExecution(MetaTransaction metaTx){
+        private static bool _onExecution(MetaTransaction metaTx)
+        {
             if (metaTx.to is not null && ContractManagement.GetContract(metaTx.to) is not null)
-            try{
-                Contract.Call(metaTx.to, metaTx.function, CallFlags.All, metaTx.from, 0, metaTx.data);
-            }catch{
-                return false;
-            }
-                
+                try
+                {
+                    Contract.Call(metaTx.to, metaTx.function, CallFlags.All, metaTx.from, 0, metaTx.data);
+                }
+                catch
+                {
+                    return false;
+                }
+
             return true;
         }
 
-        private static long _postExecution(){
+        private static long _postExecution()
+        {
             return Runtime.GasLeft;
         }
 
-        public static bool ExecuteMetaTx(MetaTransaction metaTx, string domainName, ByteString signature)
+        public static bool ExecuteMetaTx(UInt160 signer, MetaTransaction metaTx, string domainName, ByteString signature)
         {
+            RelayerOnly(signer);
+            Assert(metaTx.deadline >= Runtime.Time, "Transaction expired.");
+            DDOSStorage.DOSDetect(metaTx.to, metaTx.from);
             var gasLeft = _preExecution(metaTx.maxGas, metaTx.to);
             Assert(VerifySignature(metaTx, signature), "Signature verification failed.");
-
-            // Assert(_preExecution(), "Pre-execution failed.");
             _onExecution(metaTx);
-            // Assert(_postExecution(), "Post-execution failed.");
             var gasUsed = gasLeft - _postExecution();
-
             DepositStorage.Consume(metaTx.to, gasUsed);
-
             return true;
         }
-
-
 
         public static bool VerifySignature(MetaTransaction metaTx, ByteString signature)
         {
@@ -130,7 +138,7 @@ namespace GasFree
             ByteString digest = CryptoLib.Sha256(
                 0x1901 +
                 domainSeparator +
-                GetMetaTransactionHash(metaTx)            );
+                GetMetaTransactionHash(metaTx));
 
             ExecutionEngine.Assert(metaTx.from == Contract.CreateStandardAccount((ECPoint)metaTx.signer),
                 "Wrong public key.");
@@ -139,8 +147,11 @@ namespace GasFree
 
         public static void OnNEP17Payment(UInt160 from, BigInteger amount, object data)
         {
+            // Only accept GAS for now, may accept other tokens in the future.
             Assert(Runtime.CallingScriptHash == GAS.Hash && CheckAddrValid(from) && !CheckWhetherSelf(from) && amount > 0,
                 "OnNEP17Payment: invalid params");
+
+            // only deposit to a contract
             UInt160 target = (UInt160)data;
             Assert(CheckAddrValid(target) && ContractManagement.GetContract(target) is not null,
                 "Target contract invalid.");

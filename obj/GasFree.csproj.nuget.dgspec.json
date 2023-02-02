@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/oracle/gasfree/GasFree.csproj": {}
+    "/home/oracle/gasfreeforwarder/GasFreeForwarder.csproj": {}
   },
   "projects": {
-    "/home/oracle/gasfree/GasFree.csproj": {
+    "/home/oracle/gasfreeforwarder/GasFreeForwarder.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/oracle/gasfree/GasFree.csproj",
-        "projectName": "GasFree",
-        "projectPath": "/home/oracle/gasfree/GasFree.csproj",
+        "projectUniqueName": "/home/oracle/gasfreeforwarder/GasFreeForwarder.csproj",
+        "projectName": "GasFreeForwarder",
+        "projectPath": "/home/oracle/gasfreeforwarder/GasFreeForwarder.csproj",
         "packagesPath": "/home/oracle/.nuget/packages/",
-        "outputPath": "/home/oracle/gasfree/obj/",
+        "outputPath": "/home/oracle/gasfreeforwarder/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/oracle/.nuget/NuGet/NuGet.Config"

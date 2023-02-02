@@ -2,9 +2,9 @@ using Neo.SmartContract.Framework;
 using Neo.SmartContract.Framework.Native;
 using Neo.SmartContract.Framework.Services;
 
-namespace GasFree
+namespace GasFreeForwarder
 {
-    partial class GasFree
+    partial class GasFreeForwarder
     {
         public static bool UpgradeStart()
         {

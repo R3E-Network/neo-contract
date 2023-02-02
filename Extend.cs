@@ -2,9 +2,9 @@ using System;
 using Neo;
 using Neo.SmartContract.Framework.Services;
 
-namespace GasFree
+namespace GasFreeForwarder
 {
-    partial class GasFree{
+    partial class GasFreeForwarder{
         
         private static void Assert(bool condition, string msg)
         {
