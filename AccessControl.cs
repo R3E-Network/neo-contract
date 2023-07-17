@@ -1,48 +1,78 @@
 using Neo;
+using System;
 using Neo.SmartContract;
 using Neo.SmartContract.Framework;
 using Neo.SmartContract.Framework.Services;
 using Neo.SmartContract.Framework.Attributes;
+using System.ComponentModel;
 
 namespace GasFreeForwarder
 {
     partial class GasFreeForwarder
     {
-        [InitialValue("NbVj8GhwToNv4WF2gVaoco6hbkMQ8hrHWP", ContractParameterType.Hash160)]
-        private static readonly UInt160 InitialOwner;
+        internal string _roleExistenceKey(UInt256 role, UInt160 account) => accessControlPrefix + role + account;
+
+        [DisplayName("RoleGranted")]   // role, account, sender
+        public static event Action<UInt256, UInt160, UInt160> RoleGranted;
+        [DisplayName("RoleRevoked")]   // role, account, sender
+        public static event Action<UInt256, UInt160, UInt160> RoleRevoked;
+
+        public static readonly UInt256 ADMIN_ROLE = UInt256.Zero;
 
         [Safe]
-        public static UInt160 GetOwner()
+        public virtual bool hasRole(UInt256 role, UInt160 account)
         {
-            return OwnerStorage.Get();
+            ByteString key = Storage.Get(Storage.CurrentReadOnlyContext, _roleExistenceKey(role, account));
+            if (key is null || key == "") return false;
+            else return key == "true";
         }
 
-        public static bool SetOwner(UInt160 owner)
+        internal void _checkRole(UInt256 role, UInt160 account)
         {
-            Assert(Runtime.CheckWitness(GetOwner()), "SetOwner: CheckWitness failed, owner-".ToByteArray().Concat(owner).ToByteString());
-            Assert(CheckAddrValid(owner), "SetOwner: invalid owner-".ToByteArray().Concat(owner).ToByteString());
-            OwnerStorage.Put(owner);
-            return true;
+            if (!hasRole(role, account))
+            {
+                throw new Exception("AccessControl: account " + account + " is missing role " + role);
+            }
         }
 
-        public static bool SetRelayer(UInt160 relayer)
+        public virtual void grantRole(UInt256 role, UInt160 account, UInt160 sender)
         {
-            Assert(Runtime.CheckWitness(GetOwner()), "SetRelayer: CheckWitness failed, owner-".ToByteArray().Concat(relayer).ToByteString());
-            Assert(CheckAddrValid(relayer), "SetRelayer: invalid relayer-".ToByteArray().Concat(relayer).ToByteString());
-            RelayerStorage.Put(relayer);
-            return true;
+            ExecutionEngine.Assert(Runtime.CheckWitness(sender), "!permission");
+            _checkRole(ADMIN_ROLE, sender);
+            _grantRole(role, account, sender);
         }
 
-        public static bool DeleteRelayer(UInt160 relayer)
+        public virtual void revokeRole(UInt256 role, UInt160 account, UInt160 sender)
         {
-            Assert(Runtime.CheckWitness(GetOwner()), "DeleteRelayer: CheckWitness failed, owner-".ToByteArray().Concat(relayer).ToByteString());
-            Assert(CheckAddrValid(relayer), "DeleteRelayer: invalid relayer-".ToByteArray().Concat(relayer).ToByteString());
-            RelayerStorage.Delete(relayer);
-            return true;
+            ExecutionEngine.Assert(Runtime.CheckWitness(sender), "!permission");
+            _checkRole(ADMIN_ROLE, sender);
+            _revokeRole(role, account, sender);
         }
 
-        private static void RelayerOnly(UInt160 relayer){
-            Assert(CheckAddrValid(relayer) && Runtime.CheckWitness(relayer) && RelayerStorage.Get(relayer), "RelayerOnly: invalid relayer-".ToByteArray().Concat(relayer).ToByteString());
+
+        public virtual void renounceRole(UInt256 role, UInt160 account)
+        {
+            ExecutionEngine.Assert(Runtime.CheckWitness(account), "!permission");
+            _revokeRole(role, account, account);
         }
+
+
+        internal virtual void _grantRole(UInt256 role, UInt160 account, UInt160 sender)
+        {
+            if (!hasRole(role, account))
+            {
+                Storage.Put(Storage.CurrentContext, _roleExistenceKey(role, account), "true");
+                RoleGranted(role, account, sender);
+            }
+        }
+        internal virtual void _revokeRole(UInt256 role, UInt160 account, UInt160 sender)
+        {
+            if (hasRole(role, account))
+            {
+                Storage.Delete(Storage.CurrentContext, _roleExistenceKey(role, account));
+                RoleRevoked(role, account, sender);
+            }
+        }
+
     }
 }
