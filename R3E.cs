@@ -52,6 +52,10 @@ namespace R3E
             }
         }
 
+        public OraclePayload data(UInt256 hashkey) {
+            return (OraclePayload)StdLib.Deserialize(Storage.Get(Storage.CurrentContext, dataKey_(hashkey)));
+        }
+
         public void grantOracleRole(UInt160 oracle, UInt160 admin) {
             grantRole(ORACLE, oracle, admin);
         }
