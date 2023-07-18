@@ -10,7 +10,7 @@ using Neo.Cryptography.ECC;
 
 namespace GasFreeForwarder
 {
-    partial class GasFreeForwarder
+    public partial class GasFreeForwarder : SmartContract
     {
         internal string dataKey_(UInt256 hashkey) => dataPrefix + hashkey;
 
