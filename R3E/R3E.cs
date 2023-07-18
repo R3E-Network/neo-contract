@@ -23,7 +23,7 @@ namespace R3E
         {
             public UInt256 hashkey;
             public object data;
-            public UInt256 timestamp;
+            public ulong timestamp;
         }
 
         public void _deploy(object data, bool update)
