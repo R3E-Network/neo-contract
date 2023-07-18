@@ -8,9 +8,9 @@ using System.Numerics;
 using Neo.SmartContract.Framework.Native;
 using Neo.Cryptography.ECC;
 
-namespace GasFreeForwarder
+namespace R3E
 {
-    public partial class GasFreeForwarder : SmartContract
+    public partial class R3E : SmartContract
     {
         internal string dataKey_(UInt256 hashkey) => dataPrefix + hashkey;
 

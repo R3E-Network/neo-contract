@@ -8,9 +8,9 @@ using System.Numerics;
 using Neo.SmartContract.Framework.Native;
 using Neo.Cryptography.ECC;
 
-namespace GasFreeForwarder
+namespace R3E
 {
-    partial class GasFreeForwarder
+    partial class R3E
     {
         internal string nonceUsedKey(UInt160 addr, BigInteger nonce) => forwarderPrefix + addr + nonce;
 
@@ -33,6 +33,8 @@ namespace GasFreeForwarder
             if (key is null || key == "") return false;
             else return key == "true";
         }
+
+    
 
         public bool verifySig(ForwardRequest req, ByteString signature) {
             if (req.from != Contract.CreateStandardAccount(req.pubkey)) {

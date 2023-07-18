@@ -5,9 +5,9 @@ using Neo.SmartContract.Framework.Services;
 using Neo.SmartContract.Framework.Attributes;
 using System.ComponentModel;
 
-namespace GasFreeForwarder
+namespace R3E
 {
-    partial class GasFreeForwarder
+    partial class R3E
     {
         internal string roleExistenceKey(UInt256 role, UInt160 account) => accessControlPrefix + role + account;
 
