@@ -4,9 +4,9 @@ using Neo.SmartContract.Framework;
 using Neo.SmartContract.Framework.Native;
 using Neo.SmartContract.Framework.Services;
 
-namespace GasFreeForwarder
+namespace R3E
 {
-    partial class GasFreeForwarder
+    partial class R3E
     {
         public static readonly byte accessControlPrefix = 0x01; 
         public static readonly byte forwarderPrefix = 0x02; 

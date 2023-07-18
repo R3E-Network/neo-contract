@@ -8,9 +8,9 @@ using System.Numerics;
 using Neo.SmartContract.Framework.Native;
 using Neo.Cryptography.ECC;
 
-namespace GasFreeForwarder
+namespace R3E
 {
-    partial class GasFreeForwarder
+    partial class R3E
     {
         internal string nonceUsedKey(UInt160 addr, BigInteger nonce) => forwarderPrefix + addr + nonce;
 
