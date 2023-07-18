@@ -12,7 +12,7 @@ namespace GasFreeForwarder
 {
     partial class GasFreeForwarder
     {
-        internal string _dataKey(UInt256 hashkey) => dataPrefix + hashkey;
+        internal string dataKey_(UInt256 hashkey) => dataPrefix + hashkey;
         
         public static readonly UInt256 ORACLE = (UInt256)CryptoLib.Sha256("ORACLE");
 
