@@ -1,6 +1,5 @@
 using Neo;
 using System;
-using Neo.SmartContract;
 using Neo.SmartContract.Framework;
 using Neo.SmartContract.Framework.Services;
 using Neo.SmartContract.Framework.Attributes;
@@ -49,13 +48,11 @@ namespace GasFreeForwarder
             _revokeRole(role, account, sender);
         }
 
-
         public virtual void renounceRole(UInt256 role, UInt160 account)
         {
             ExecutionEngine.Assert(Runtime.CheckWitness(account), "!permission");
             _revokeRole(role, account, account);
         }
-
 
         internal virtual void _grantRole(UInt256 role, UInt160 account, UInt160 sender)
         {
@@ -65,6 +62,7 @@ namespace GasFreeForwarder
                 RoleGranted(role, account, sender);
             }
         }
+
         internal virtual void _revokeRole(UInt256 role, UInt160 account, UInt160 sender)
         {
             if (hasRole(role, account))
@@ -73,6 +71,5 @@ namespace GasFreeForwarder
                 RoleRevoked(role, account, sender);
             }
         }
-
     }
 }
