@@ -12,7 +12,7 @@ namespace GasFreeForwarder
 {
     partial class GasFreeForwarder
     {
-        internal string _nonceUsedKey(UInt160 addr, BigInteger nonce) => forwarderPrefix + addr + nonce;
+        internal string nonceUsedKey(UInt160 addr, BigInteger nonce) => forwarderPrefix + addr + nonce;
 
         public struct ForwardRequest {
             public UInt160 from;
@@ -23,8 +23,13 @@ namespace GasFreeForwarder
             public string method;
             public object[] args;
         }
+        public struct ExecRet {
+            public bool succ;
+            public object ret;
+
+        }
         public bool nonceUsed(UInt160 addr, BigInteger nonce) {
-            ByteString key = Storage.Get(Storage.CurrentReadOnlyContext, _nonceUsedKey(addr, nonce));
+            ByteString key = Storage.Get(Storage.CurrentReadOnlyContext, nonceUsedKey(addr, nonce));
             if (key is null || key == "") return false;
             else return key == "true";
         }
@@ -41,9 +46,9 @@ namespace GasFreeForwarder
             return CryptoLib.VerifyWithECDsa((ByteString)msg, req.pubkey, (ByteString)signature, NamedCurve.secp256r1);
         }
 
-        public (bool, object) execute(ForwardRequest req, ByteString signature) {
+        public ExecRet execute(ForwardRequest req, ByteString signature) {
             ExecutionEngine.Assert(verifySig(req,signature), "!sig");
-            Storage.Put(Storage.CurrentReadOnlyContext, _nonceUsedKey(req.from, req.nonce), "true");
+            Storage.Put(Storage.CurrentReadOnlyContext, nonceUsedKey(req.from, req.nonce), "true");
             if (Runtime.GasLeft < req.gas) {
                 throw new Exception("insufficient GAS");
             }
@@ -56,7 +61,7 @@ namespace GasFreeForwarder
                 succ = false;
             }
 
-            return (succ, ret);
+            return new ExecRet{succ=succ, ret=ret};
         }
     }
 }
