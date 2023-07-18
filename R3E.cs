@@ -13,18 +13,50 @@ namespace GasFreeForwarder
     partial class GasFreeForwarder
     {
         internal string dataKey_(UInt256 hashkey) => dataPrefix + hashkey;
-        
+
+        [DisplayName("Execution")]   // success, returndata, req
+        public static event Action<bool, object, ForwardRequest> Execution;
+
         public static readonly UInt256 ORACLE = (UInt256)CryptoLib.Sha256("ORACLE");
 
-        public struct OraclePayload {
+        public struct OraclePayload
+        {
             public UInt256 hashkey;
             public object data;
             public UInt256 timestamp;
         }
 
-        
+        public void _deploy()
+        {
+            UInt160 sender = ((Transaction)Runtime.ScriptContainer).Sender;
+            grantRole_(ADMIN_ROLE, sender, sender);
+        }
 
+        public void executeWithData(OraclePayload[] op,
+            ForwardRequest req,
+            ByteString signature)
+        {
+            UInt160 sender = ((Transaction)Runtime.ScriptContainer).Sender;
+            checkRole_(ORACLE, sender);
+            ExecutionEngine.Assert(Runtime.CheckWitness(sender), "no permission");
 
+            for (uint i = 0; i < op.Length; i++) {
+                Storage.Put(Storage.CurrentContext, dataKey_(op[i].hashkey), StdLib.Serialize(op[i]));
+            }
 
+            ExecRet ret = execute(req, signature);
+            Execution(ret.succ, ret.ret, req);
+
+            for (uint i = 0; i < op.Length; i++) {
+                Storage.Delete(Storage.CurrentContext, dataKey_(op[i].hashkey));
+            }
+        }
+
+        public void grantOracleRole(UInt160 oracle, UInt160 admin) {
+            grantRole(ORACLE, oracle, admin);
+        }
+        public void revokeOracleRole(UInt160 oracle, UInt160 admin) {
+            revokeRole(ORACLE, oracle, admin);
+        }
     }
 }
