@@ -19,7 +19,7 @@ client.virutal_deploy_from_path('../R3E/bin/sc/R3E.nef')
 print(client.contract_scripthash)
 client.delete_source_code_breakpoints()
 client.set_source_code_breakpoint('MinimalForwarder.cs', 48)
-breakpoint_ = client.debug_function_with_session('verifySig', [forwardRequest, 'akXt4ikmFDuk13AwhPKjXvnOA4ORerQU9aspQtrIpZqQGt04inuaI6+DRocWCr4eCed+f6+OhuOGFAvMMCoy+w=='])
+breakpoint_ = client.debug_function_with_session('verifySig', [forwardRequest, bytearray.fromhex("6a45ede22926143ba4d7703084f2a35ef9ce0383917ab414f5ab2942dac8a59a901add388a7b9a23af834687160abe1e09e77e7faf8e86e386140bcc302a32fb")])
 print(breakpoint_)
 print('signature', client.get_variable_value_by_name('signature'))
 print('req', client.get_variable_value_by_name('req'))
@@ -30,4 +30,4 @@ print('fakeTransaction', client.get_variable_value_by_name('fakeTransaction'))
 print('msg', client.get_variable_value_by_name('msg'))
 # print(client.debug_step_into())
 
-assert client.invokefunction('verifySig', [forwardRequest, bytes(bytearray.fromhex("6a45ede22926143ba4d7703084f2a35ef9ce0383917ab414f5ab2942dac8a59a901add388a7b9a23af834687160abe1e09e77e7faf8e86e386140bcc302a32fb"))]) is True
+assert client.invokefunction('verifySig', [forwardRequest, bytearray.fromhex("6a45ede22926143ba4d7703084f2a35ef9ce0383917ab414f5ab2942dac8a59a901add388a7b9a23af834687160abe1e09e77e7faf8e86e386140bcc302a32fb")]) is True

@@ -26,10 +26,13 @@ namespace R3E
             public UInt256 timestamp;
         }
 
-        public void _deploy()
+        public void _deploy(object data, bool update)
         {
-            UInt160 sender = ((Transaction)Runtime.ScriptContainer).Sender;
-            grantRole_(ADMIN_ROLE, sender, sender);
+            if (!update)
+            {
+                UInt160 sender = ((Transaction)Runtime.ScriptContainer).Sender;
+                grantRole_(ADMIN_ROLE, sender, sender);
+            }
         }
 
         public void executeWithData(OraclePayload[] op,
