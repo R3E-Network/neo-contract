@@ -34,15 +34,18 @@ namespace R3E
             else return key == "true";
         }
 
+    
+
         public bool verifySig(ForwardRequest req, ByteString signature) {
             if (req.from != Contract.CreateStandardAccount(req.pubkey)) {
                 return false;
             }
             BigInteger network = Runtime.GetNetwork();
             byte[] networkB = new byte[] { (byte)(network % 256), (byte)((network >> 8) % 256), (byte)((network >> 16) % 256), (byte)((network >> 24) % 256) };
-            ByteString fakeScript = StdLib.JsonSerialize(new object[]{req.to, req.method, req.args});
-            byte[] fakeTransaction = new byte[] {0x00, (byte)(req.nonce % 256), (byte)((req.nonce >> 8) % 256), (byte)((req.nonce >> 16) % 256), (byte)((req.nonce >> 24) % 256), (byte)(req.gas % 256), (byte)((req.gas >> 8) % 256), (byte)((req.gas >> 16) % 256), (byte)((req.gas >> 24) % 256), (byte)((req.gas >> 32) % 256), (byte)((req.gas >> 40) % 256), (byte)((req.gas >> 48) % 256), (byte)((req.gas >> 56) % 256), 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0d, (byte)(fakeScript.Length % 256), (byte)(fakeScript.Length >> 8 % 256)};
-            byte[] msg = networkB.Concat(CryptoLib.Sha256((ByteString)fakeTransaction));
+            ByteString fakeScript = StdLib.Serialize(new object[]{req.to, req.method, req.args});
+            byte[] fakeTransaction = new byte[] {0x00, (byte)(req.nonce % 256), (byte)((req.nonce >> 8) % 256), (byte)((req.nonce >> 16) % 256), (byte)((req.nonce >> 24) % 256), (byte)(req.gas % 256), (byte)((req.gas >> 8) % 256), (byte)((req.gas >> 16) % 256), (byte)((req.gas >> 24) % 256), (byte)((req.gas >> 32) % 256), (byte)((req.gas >> 40) % 256), (byte)((req.gas >> 48) % 256), (byte)((req.gas >> 56) % 256), 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, (byte)(fakeScript.Length + 3), 0x0d, (byte)(fakeScript.Length % 256), (byte)(fakeScript.Length >> 8 % 256)};
+            ByteString concat = (ByteString)fakeTransaction.Concat(fakeScript);
+            byte[] msg = networkB.Concat(CryptoLib.Sha256(concat));
             return CryptoLib.VerifyWithECDsa((ByteString)msg, req.pubkey, (ByteString)signature, NamedCurve.secp256r1);
         }
 
