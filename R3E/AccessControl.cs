@@ -4,6 +4,7 @@ using Neo.SmartContract.Framework;
 using Neo.SmartContract.Framework.Services;
 using Neo.SmartContract.Framework.Attributes;
 using System.ComponentModel;
+using System.Numerics;
 
 namespace R3E
 {
@@ -30,7 +31,7 @@ namespace R3E
         {
             if (!hasRole(role, account))
             {
-                throw new Exception("AccessControl: account " + account + " is missing role " + role);
+                throw new Exception("AccessControl: account " + (BigInteger)account + " is missing role " + (BigInteger)role);
             }
         }
 
