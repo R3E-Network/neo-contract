@@ -10,6 +10,11 @@ using Neo.Cryptography.ECC;
 
 namespace R3E
 {
+//    [DisplayName("R3E")]
+//    [ManifestExtra("Author", "NEO")]
+//    [ManifestExtra("Email", "developer@neo.org")]
+    [ContractPermission("*", "*")]
+//    [ManifestExtra("Description", "R3E oracle")]
     public partial class R3E : SmartContract
     {
         internal string dataKey_(UInt256 hashkey) => dataPrefix + hashkey;

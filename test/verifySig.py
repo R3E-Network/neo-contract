@@ -1,4 +1,4 @@
-from neo_fairy_client import FairyClient, Hash160Str, Hash256Str, PublicKeyStr, gas
+from neo_fairy_client.rpc.fairy_client import FairyClient, Hash160Str, PublicKeyStr, GasAddress
 
 wallet_address = 'NM4cADAcmUjgGZvzz5nqpionpkrmpNCbjb'
 wallet_scripthash = Hash160Str.from_address(wallet_address)
@@ -7,7 +7,7 @@ publickey = PublicKeyStr('022b22669b3eb1d6eb766b109a58040a5daccf6d6384e06e9d490d
 forwardRequest = [
     wallet_scripthash,
     publickey,
-    Hash160Str.from_UInt160(gas.hash),
+    GasAddress,
     1000_0000_0000,
     1231,
     'transfer',
