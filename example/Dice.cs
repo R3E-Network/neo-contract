@@ -32,7 +32,7 @@ namespace example
         public static readonly BigInteger MOD = 1048576;
 
 
-        [InitialValue("NYPS8pgHFJHV9JdUVrqTgbquxYS5CNccT8", ContractParameterType.Hash160)]
+        [InitialValue("Niiqpg1t4KJrVHvUk4k8smTGBmAHXzf7EB", ContractParameterType.Hash160)]
         private static readonly UInt160 R3E = default;
 
         // must be two parameters, the first is the account verified by R3E, the second is an array accept all other needed args
