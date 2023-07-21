@@ -17,7 +17,7 @@ namespace R3E
 //    [ManifestExtra("Description", "R3E oracle")]
     public partial class R3E : SmartContract
     {
-        internal string dataKey_(UInt256 hashkey) => dataPrefix + hashkey;
+        public ByteString dataKey_(UInt256 hashkey) => dataPrefix + hashkey;
 
         [DisplayName("Execution")]   // success, returndata, req
         public static event Action<bool, object, ForwardRequest> Execution;

@@ -4,8 +4,6 @@ import base64, base58, binascii
 import ecdsa
 
 ROLE_ADMIN = Hash256Str.zero()
-# print('ROLE_ORACLE:', ROLE_ORACLE := Hash256Str(hashlib.sha256(b'ORACLE').hexdigest()))
-print('DICE_HASHKEY:', DICE_HASHKEY := Hash256Str(hashlib.sha256(b'RANDOM').hexdigest()))
 
 deployer = Hash160Str.from_address('NM4cADAcmUjgGZvzz5nqpionpkrmpNCbjb')
 deployer_publickey = PublicKeyStr('022b22669b3eb1d6eb766b109a58040a5daccf6d6384e06e9d490da329f94c8191')
@@ -30,7 +28,7 @@ print('fakeScript:', fakeScript_byte.hex())
 tx_base64_encoded = client.force_sign_transaction(script_base64_encoded=base64.b64encode(fakeScript_byte), nonce=1231, system_fee=1000_0000, valid_until_block=0)
 print(tx_base64_encoded)
 print(full_tx := client.previous_raw_result)
-oracle_payloads = [[DICE_HASHKEY, None, client.get_time_milliseconds() + 60_000],]
+oracle_payloads = [[client.invokefunction_of_any_contract(dice_contract, 'hashKey'), b'rua!!', client.get_time_milliseconds() + 60_000],]
 forward_request = [deployer, deployer_publickey, dice_contract, full_tx['gasconsumed'], full_tx['nonce'], "play", [deployer, []]]
 
 msg_to_sign = client.invokefunction('msgHelper', [forward_request])
@@ -41,4 +39,23 @@ vk = sk.get_verifying_key()
 signature = sk.sign(msg_to_sign)
 assert vk.verify(signature, msg_to_sign)
 
-print(client.invokefunction("executeWithData", [oracle_payloads, forward_request, signature]))
+# try: client.delete_assembly_breakpoints(); client.delete_source_code_breakpoints()
+# except: pass
+# client.set_source_code_breakpoint("R3E.cs", 53)
+# client.set_source_code_breakpoint("R3E.cs", 66)
+#
+# print(client.debug_function_with_session("executeWithData", [oracle_payloads, forward_request, signature]))
+# print(client.get_variable_value_by_name('op'))
+# print(client.get_variable_value_by_name('dataKey'))
+#
+# print(client.debug_continue())
+# print(client.get_variable_value_by_name('hashkey'))
+# print(client.get_variable_value_by_name('dataKey'))
+
+client.invokefunction("executeWithData", [oracle_payloads, forward_request, signature])
+assert len(client.previous_raw_result['result']['notifications']) == 1
+
+oracle_payloads_for_winning = [[client.invokefunction_of_any_contract(dice_contract, 'hashKey'), b'awsl!', client.get_time_milliseconds() + 60_000],]
+client.invokefunction("executeWithData", [oracle_payloads_for_winning, forward_request, signature])
+assert len(client.previous_raw_result['result']['notifications']) == 2
+# breakpoint()
