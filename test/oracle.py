@@ -12,7 +12,7 @@ deployer_WIF_private_key = 'L3v6oswfiUGUuE6HR66VH7KF2A7ipQzBjbHcRC31cbEa5REH5qcY
 # print('DEPLOYER PRIVATE KEY:', deployer_private_key)
 
 client = FairyClient(fairy_session='oracle', wallet_address_or_scripthash=deployer)
-client.set_session_fairy_wallet_with_WIF(deployer_WIF_private_key, "passwd")
+client.set_session_fairy_wallet_with_WIF(deployer_WIF_private_key, "passwd")  # using neo-fairy-client/test 3.5.10; in future versions, password is not needed for WIF
 client.contract_scripthash = client.virutal_deploy_from_path('../R3E/bin/sc/R3E.nef')
 print('R3E:', client.contract_scripthash, client.contract_scripthash.to_address())
 client.invokefunction('grantOracleRole', [deployer, deployer])
@@ -33,11 +33,14 @@ forward_request = [deployer, deployer_publickey, dice_contract, full_tx['gascons
 
 msg_to_sign = client.invokefunction('msgHelper', [forward_request])
 print('Message to sign:', msg_to_sign)
+signature = client.force_sign_message(msg_to_sign)
+print(signature)
+
 deployer_private_key_bytes = base58.b58decode(deployer_WIF_private_key)[1:-5]
 sk = ecdsa.SigningKey.from_string(deployer_private_key_bytes, curve=ecdsa.NIST256p, hashfunc=hashlib.sha256)
 vk = sk.get_verifying_key()
-signature = sk.sign(msg_to_sign)
 assert vk.verify(signature, msg_to_sign)
+assert vk.verify(sk.sign(msg_to_sign), msg_to_sign)
 
 # try: client.delete_assembly_breakpoints(); client.delete_source_code_breakpoints()
 # except: pass
