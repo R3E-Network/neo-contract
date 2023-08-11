@@ -38,6 +38,7 @@ namespace example
         // must be two parameters, the first is the account verified by R3E, the second is an array accept all other needed args
         public static void Play(UInt160 account, object[] args)
         {
+            ExecutionEngine.Assert(Runtime.CallingScriptHash == R3E, "not called by R3E");
             UInt256 HASHKEY = HashKey();
             OraclePayload data = (OraclePayload)Contract.Call(R3E, "data", CallFlags.ReadOnly, HASHKEY);
             ExecutionEngine.Assert(data.hashkey == HASHKEY, "oracle record not exist");
