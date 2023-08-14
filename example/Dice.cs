@@ -31,7 +31,7 @@ namespace example
         public static UInt256 HashKey() => (UInt256)CryptoLib.Sha256("RANDOM");
         public static readonly BigInteger MOD = 1048576;
 
-
+        // TODO: change to the real R3E address in your dAPP, this address is from the test
         [InitialValue("NcBFMh9j1JtsJm51YGTim1rKGacY6XrHk6", ContractParameterType.Hash160)]
         private static readonly UInt160 R3E = default;
 

@@ -49,7 +49,8 @@ oracle data are stored at the R3E contract, indexed by the key you registered at
 ### 2.2 build R3E contract
 
 * `dotnet new -i Neo3.SmartContract.Templates`
-* `cd R3E && dotnet build`, you will see the contract's manifest and nef file at `R3E/bin/sc`
+* `cd R3E && dotnet build`, you will see the contract's manifest and nef file at `R3E/bin/sc`, you will also see the nef debug file which is required for test
+* `cd example && dotnet build`
 
 ### 2.3 test
 
@@ -63,3 +64,27 @@ python oracle.py
 python verifySig.py
 ```
 
+### 2.4 build meta transaction
+
+if you are using [neoline](https://neoline.io/dapi/N3.html), use `signTransaction`
+
+we build a fake transaction as the meta transaction, this transaction can never be put on the chain
+
+```javascript
+neolineN3 = new NEOLineN3.Init();
+neolineN3.signTransaction({
+  transaction: {
+    version: 0, // must be 0
+    nonce: 1231,  // must be used only once, use a random number will be OK
+    systemFee: 1000_0000_0000, // maximum GAS the dAPP can use
+    networkFee: 0, // must be 0
+    validUntilBlock: 0, // must be 0
+    attributes: [], // must be empty
+    witnesses: [], // must be empty
+    script: "0d530040032814cf76e28bd0062c4a478ee35561011319f3cfa4d228087472616e73666572400428140c9a5139540d6be981633220ca195c5026a8517628140c9a5139540d6be981633220ca195c5026a85176210000" // a single command fake script with the format of `pushdata2 {$to,$method,$args}`, this contains the dAPP's address and method with args that the user want to call, they should be serialized as a ByteString using the NEO's native contract StdLib by `StdLib.Serialize(new object[]{$to,$method,$args})`
+  },
+  magicNumber: 860833102 // network id
+}).then(signedTx => {
+  console.log('Signed Transaction:', signedTx);
+})
+```
