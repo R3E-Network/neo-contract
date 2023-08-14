@@ -12,7 +12,7 @@ deployer_WIF_private_key = 'L3v6oswfiUGUuE6HR66VH7KF2A7ipQzBjbHcRC31cbEa5REH5qcY
 # print('DEPLOYER PRIVATE KEY:', deployer_private_key)
 
 client = FairyClient(fairy_session='oracle', wallet_address_or_scripthash=deployer)
-client.set_session_fairy_wallet_with_WIF(deployer_WIF_private_key)  # using neo-fairy-client/test 3.5.12
+client.set_session_fairy_wallet_with_WIF(deployer_WIF_private_key)  # using neo-fairy-client/test 3.5.0.13
 client.contract_scripthash = client.virutal_deploy_from_path('../R3E/bin/sc/R3E.nef')
 print('R3E:', client.contract_scripthash, client.contract_scripthash.to_address())
 client.invokefunction('grantOracleRole', [deployer, deployer])
