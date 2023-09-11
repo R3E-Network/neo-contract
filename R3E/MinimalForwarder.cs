@@ -56,6 +56,7 @@ namespace R3E
 
         public ExecRet execute(ForwardRequest req, ByteString signature) {
             ExecutionEngine.Assert(verifySig(req,signature), "!sig");
+            ExecutionEngine.Assert(!nonceUsed(req.from, req.nonce), "!sig");
             Storage.Put(Storage.CurrentContext, nonceUsedKey(req.from, req.nonce), "true");
             if (Runtime.GasLeft < req.gas) {
                 throw new Exception("insufficient GAS");
