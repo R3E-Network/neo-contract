@@ -6,7 +6,7 @@ deployer = Hash160Str.from_address(wallet_address)
 melon_eater = Hash160Str.from_address('Nb2CHYY5wTh2ac58mTue5S3wpG6bQv5hSY')
 power_seizer = Hash160Str.from_address('NaainHz563mJLsHRsPD4NrKjMEQGBXXJY9')
 client = FairyClient(fairy_session='ac', wallet_address_or_scripthash=deployer)
-client.contract_scripthash = client.virutal_deploy_from_path('../R3E/bin/sc/R3E.nef')
+client.contract_scripthash = client.virutal_deploy_from_path('../R3E/bin/sc/MinimalForwarder.nef')
 print(client.contract_scripthash)
 
 print(client.find_storage_with_session(''))

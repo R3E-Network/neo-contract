@@ -1,6 +1,5 @@
 ﻿using Neo;
 using Neo.SmartContract.Framework;
-using Neo.SmartContract.Framework.Native;
 using System.Numerics;
 
 namespace MinimalForwarder

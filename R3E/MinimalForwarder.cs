@@ -16,6 +16,8 @@ namespace MinimalForwarder
     [ManifestExtra("Description", "openzeppelin MinimalForwarder")]
     public partial class MinimalForwarder : SmartContract
     {
+        public const byte forwarderPrefix = 0x02;
+
         public struct ForwardRequest
         {
             public UInt160 from;
