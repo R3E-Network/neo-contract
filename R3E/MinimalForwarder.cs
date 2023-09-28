@@ -17,6 +17,9 @@ namespace MinimalForwarder
     public partial class MinimalForwarder : SmartContract
     {
         public const byte forwarderPrefix = 0x02;
+        public ByteString MINIMAL_FORWARDER_TYPE_HASH() => (ByteString)BigInteger.Parse("32789846889875464333465174299582028435151612399515816426518116240359049367517");
+        // 0x487e6549a3e7599719b89e6a81618ba72806a32891d39b883e39f4b0704b8fdd
+        // keccak256("ForwardRequest(address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data)".ToByteArray());
 
         public struct ForwardRequest
         {
@@ -41,7 +44,10 @@ namespace MinimalForwarder
             else return value == "t";
         }
 
-        public ByteString DataToVerify(ForwardRequest req) => hashTypedDataV4(keccak256(abiencode(_TYPE_HASH, req.from, req.to, req.value, req.gas, req.nonce, keccak256(StdLib.Serialize(new object[] { req.method, req.args })))));
+        public ByteString CallDataToVerify(ForwardRequest req) => StdLib.Serialize(new object[] { req.method, req.args });
+        public ByteString StructToVerify(ForwardRequest req, ByteString calldata) => abiencode(MINIMAL_FORWARDER_TYPE_HASH(), req.from, req.to, req.value, req.gas, req.nonce, keccak256(calldata));
+        public ByteString DataToVerify(ForwardRequest req) => hashTypedDataV4(keccak256(StructToVerify(req, CallDataToVerify(req))));
+        public ByteString DataToVerify(ForwardRequest req, ByteString calldata) => hashTypedDataV4(keccak256(StructToVerify(req, calldata)));
 
         public bool Verify(ForwardRequest req, ByteString signature)
         {

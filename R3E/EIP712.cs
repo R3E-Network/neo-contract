@@ -1,21 +1,33 @@
-﻿using Neo.SmartContract.Framework;
+﻿using Neo;
+using Neo.SmartContract.Framework;
 using Neo.SmartContract.Framework.Services;
 using System.Numerics;
-
 
 namespace MinimalForwarder
 {
     public partial class MinimalForwarder
     {
-        public const string _version = "0.0.1";
-        public const string _name = "MinimalForwarder";
-        public const string _type = "ForwardRequest(address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data)";
-        public ByteString _TYPE_HASH => (ByteString)BigInteger.Parse("32789846889875464333465174299582028435151612399515816426518116240359049367517");
-        // 0x487e6549a3e7599719b89e6a81618ba72806a32891d39b883e39f4b0704b8fdd
-        // keccak256("ForwardRequest(address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data)".ToByteArray());
+        // 0x9e0923a39f515e9a8cebc9fb694b9abf7e4b8c3f7ab6f81b56eabdac504b08dc
+        public static ByteString HashedName() => (ByteString)new byte[] { 0x9e, 0x09, 0x23, 0xa3, 0x9f, 0x51, 0x5e, 0x9a, 0x8c, 0xeb, 0xc9, 0xfb, 0x69, 0x4b, 0x9a, 0xbf, 0x7e, 0x4b, 0x8c, 0x3f, 0x7a, 0xb6, 0xf8, 0x1b, 0x56, 0xea, 0xbd, 0xac, 0x50, 0x4b, 0x08, 0xdc };
+        // 0xae209a0b48f21c054280f2455d32cf309387644879d9acbd8ffc199163811885
+        public static ByteString HashedVersion() => (ByteString)new byte[] { 0xae, 0x20, 0x9a, 0x0b, 0x48, 0xf2, 0x1c, 0x05, 0x42, 0x80, 0xf2, 0x45, 0x5d, 0x32, 0xcf, 0x30, 0x93, 0x87, 0x64, 0x48, 0x79, 0xd9, 0xac, 0xbd, 0x8f, 0xfc, 0x19, 0x91, 0x63, 0x81, 0x18, 0x85 };
 
+        //public const string _version = "0.0.1";
+        //public const string _name = "MinimalForwarder";
+        //public const string _type = "ForwardRequest(address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data)";
+        //public ByteString DOMAIN_SEPARATOR_TYPE_HASH() => (ByteString)BigInteger.Parse("63076024560530113402979550242307453568063438748328787417531900361828837441551");
+        public ByteString DOMAIN_SEPARATOR_TYPE_HASH() => (ByteString)new byte[] { 0x8b, 0x73, 0xc3, 0xc6, 0x9b, 0xb8, 0xfe, 0x3d, 0x51, 0x2e, 0xcc, 0x4c, 0xf7, 0x59, 0xcc, 0x79, 0x23, 0x9f, 0x7b, 0x17, 0x9b, 0x0f, 0xfa, 0xca, 0xa9, 0xa7, 0x5d, 0x52, 0x2b, 0x39, 0x40, 0x0f };
+        // 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f
+        // keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)")
 
-        public ByteString domainSeparatorV4() => keccak256(abiencode(_TYPE_HASH, keccak256(_name), keccak256(_version), 31337/*Runtime.GetNetwork()*/, Runtime.ExecutingScriptHash));
+        public ByteString domainSeparatorV4TestAbi() => abiencode(DOMAIN_SEPARATOR_TYPE_HASH(), HashedName(), HashedVersion(), 31337/*Runtime.GetNetwork()*/,
+            /*Runtime.ExecutingScriptHash*/
+            (UInt160)new byte[] { 0x5f, 0xbd, 0xb2, 0x31, 0x56, 0x78, 0xaf, 0xec, 0xb3, 0x67, 0xf0, 0x32, 0xd9, 0x3f, 0x64, 0x2f, 0x64, 0x18, 0x0a, 0xa3 }
+            );
+        public ByteString domainSeparatorV4() => keccak256(abiencode(DOMAIN_SEPARATOR_TYPE_HASH(), HashedName(), HashedVersion(), 31337/*Runtime.GetNetwork()*/,
+            /*Runtime.ExecutingScriptHash*/
+            (UInt160)new byte[] { 0x5f, 0xbd, 0xb2, 0x31, 0x56, 0x78, 0xaf, 0xec, 0xb3, 0x67, 0xf0, 0x32, 0xd9, 0x3f, 0x64, 0x2f, 0x64, 0x18, 0x0a, 0xa3 }
+            ));
         public ByteString hashTypedDataV4(ByteString structHash) => toTypedDataHash(domainSeparatorV4(), structHash);
     }
 }

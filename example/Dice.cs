@@ -32,13 +32,13 @@ namespace example
         public static readonly BigInteger MOD = 1048576;
 
         // TODO: change to the real R3E address in your dAPP, this address is from the test
-        [InitialValue("NMYYsDi6TuKRZ3t6ajsXFgrwtm52McsHpE", ContractParameterType.Hash160)]
+        [InitialValue("NhSXp1NpMQE4g3x5pGm3VkzM1uverSJ9nU", ContractParameterType.Hash160)]
         private static readonly UInt160 R3E = default;
 
         // must be two parameters, the first is the account verified by R3E, the second is an array accept all other needed args
         public static void Play(UInt160 account, object args)
         {
-            // ExecutionEngine.Assert(Runtime.CallingScriptHash == R3E, "not called by R3E");
+            ExecutionEngine.Assert(Runtime.CallingScriptHash == R3E, "not called by R3E");
             UInt256 HASHKEY = HashKey();
             OraclePayload data = (OraclePayload)Contract.Call(R3E, "data", CallFlags.ReadOnly, HASHKEY);
             ExecutionEngine.Assert(data.hashkey == HASHKEY, "oracle record not exist");

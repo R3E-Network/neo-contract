@@ -1,4 +1,4 @@
-from neo_fairy_client import FairyClient, Hash160Str, PublicKeyStr
+from neo_fairy_client import FairyClient, Hash160Str, Hash256Str, PublicKeyStr
 import ecdsa, base58, hashlib
 
 deployer = Hash160Str.from_address('NM4cADAcmUjgGZvzz5nqpionpkrmpNCbjb')
@@ -98,4 +98,23 @@ assert vk.verify(signature, msg_to_sign)
 
 oracle_payloads = [[c.invokefunction_of_any_contract(dice_address, 'hashKey'), b'rua!!', c.get_time_milliseconds() + 60_000],]
 c.invokefunction('grantOracleRole', [deployer, deployer])
-c.invokefunction('executeWithData', [oracle_payloads, forward_request, signature])
+# c.invokefunction('executeWithData', [oracle_payloads, forward_request, signature])
+
+print()
+assert c.invokefunction('structToVerify', [
+    [Hash160Str('0x06b9931e101f2e9885e76503874f2cebf69bf790'), PublicKeyStr.from_ecdsa_verifying_key(vk), Hash160Str('0x02660107ede44e33f5281d7148311917d63a3f66'), 0, 300_0000, 0, 'play', [deployer, 1]],
+    b'\x93\xe8\x4c\xd9']).hex() == "dd8f4b70b0f4393e889bd39128a30628a78b61816a9eb8199759e7a349657e4800000000000000000000000090f79bf6eb2c4f870365e785982e1f101e93b906000000000000000000000000663f3ad617193148711d28f5334ee4ed07016602000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002dc6c0000000000000000000000000000000000000000000000000000000000000000003c3502d86f21966b48c4c9d22b70395d32b485c6026b345a28d1cb2793d0d89"
+assert c.invokefunction('mINIMAL_FORWARDER_TYPE_HASH') == Hash256Str('0x487e6549a3e7599719b89e6a81618ba72806a32891d39b883e39f4b0704b8fdd')
+print()
+assert c.invokefunction('dOMAIN_SEPARATOR_TYPE_HASH') == Hash256Str('0x0f40392b525da7a9cafa0f9b177b9f2379cc59f74ccc2e513dfeb89bc6c3738b')
+print(c.invokefunction('hashedName').encode().hex())
+assert c.invokefunction('hashedName') == Hash256Str('0xdc084b50acbdea561bf8b67a3f8c4b7ebf9a4b69fbc9eb8c9a5e519fa323099e')
+assert c.invokefunction('hashedVersion') == Hash256Str('0x851881639119fc8fbdacd9794864879330cf325d45f28042051cf2480b9a20ae')
+assert c.invokefunction('domainSeparatorV4TestAbi').hex() == '8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f9e0923a39f515e9a8cebc9fb694b9abf7e4b8c3f7ab6f81b56eabdac504b08dcae209a0b48f21c054280f2455d32cf309387644879d9acbd8ffc1991638118850000000000000000000000000000000000000000000000000000000000007a690000000000000000000000005fbdb2315678afecb367f032d93f642f64180aa3'
+assert c.invokefunction('domainSeparatorV4') == Hash256Str('0xc7d403ce35603ce8c77b96d1dddddabea40459424cb63e33295e2624b71aa3e7')
+# print(c.invokefunction('abiencode', [Hash160Str('0x06b9931e101f2e9885e76503874f2cebf69bf790'), True]))
+# c.delete_source_code_breakpoints()
+# c.delete_assembly_breakpoints()
+# c.set_assembly_breakpoints(161)
+# print(c.debug_function_with_session('abiencode', [Hash160Str('0x06b9931e101f2e9885e76503874f2cebf69bf790'), True]))
+# breakpoint()
