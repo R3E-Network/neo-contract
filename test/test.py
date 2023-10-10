@@ -23,10 +23,17 @@ sk = ecdsa.SigningKey.from_string(deployer_private_key_bytes, curve=ecdsa.SECP25
 vk = sk.get_verifying_key()
 
 forward_request = [deployer, PublicKeyStr.from_ecdsa_verifying_key(vk), dice_address, 0, 1000_0000, 1234, 'play', [deployer, 1]]
+print('call data, or req.data:', '0x' + c.invokefunction('callDataToVerify', [forward_request]).hex())
 print(msg_to_sign := c.invokefunction('dataToVerify', [forward_request]))
 msg_to_sign = msg_to_sign.to_UInt256()
 
 '''
+// Open your browser with metamask plugin
+// visit https://metamask.github.io/test-dapp
+// launch a local hardhat node with `npx hardhat node`. It should have chain Id 31337 with JSON-RPC server at http://127.0.0.1:8545/
+// import ethereum wallet with the private key of variable deployer_private_key_hex
+// the address should be 0x1feB0bD36208145A40dC0A2004e31f094ecFa7E7
+// execute the following codes in the console of developer tools (F12)
 const accounts = await ethereum.request({
     method: 'eth_requestAccounts',
   });
@@ -67,25 +74,25 @@ await window.ethereum.request({
       "domain": {
         "name": "MinimalForwarder",
         "version": "0.0.1",
-        "chainId": 1,
-        "verifyingContract": "0xa810b1b57aa73341b77353ad94cad08c2437e311"
+        "chainId": 31337,
+        "verifyingContract": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
       },
       "message": {
           from: '0x7651a826505c19ca20326381e96b0d5439519a0c',
-          to: '0x94b39c096338bc15f6023d83617b1660ee9f7fb4',
+          to: '0x37909f174bac07bcf9e5eaedd2158bc46c578e30',
           value: 0,
           gas: 1000_0000,
           nonce: 1234,
-          data: '0x39136c1d2d587d56d4440e7a57c14f35fb80960b6dc3730e29c5d4ab25d909a8'
+          data: '0x40022804706c6179400228140c9a5139540d6be981633220ca195c5026a85176210101'
       }
     }
   ]
 });
 '''
 auto_signature = sk.sign(msg_to_sign)
-print(auto_signature.hex())
-# signature = input("Input metamask signature result, or leave this empty and use auto sigs: ")
-signature = ""
+print('auto_signature:', auto_signature.hex())
+signature = input("Input metamask signature result, or leave this empty and use auto sigs: ")
+# signature = ""
 if signature:
     signature = signature.replace("0x", "").replace(r'"', "")
     signature = bytes.fromhex(signature)
@@ -98,20 +105,25 @@ assert vk.verify(signature, msg_to_sign)
 
 oracle_payloads = [[c.invokefunction_of_any_contract(dice_address, 'hashKey'), b'rua!!', c.get_time_milliseconds() + 60_000],]
 c.invokefunction('grantOracleRole', [deployer, deployer])
-# c.invokefunction('executeWithData', [oracle_payloads, forward_request, signature])
+c.invokefunction('executeWithData', [oracle_payloads, forward_request, signature])
 
-print()
-assert c.invokefunction('structToVerify', [
-    [Hash160Str('0x06b9931e101f2e9885e76503874f2cebf69bf790'), PublicKeyStr.from_ecdsa_verifying_key(vk), Hash160Str('0x02660107ede44e33f5281d7148311917d63a3f66'), 0, 300_0000, 0, 'play', [deployer, 1]],
-    b'\x93\xe8\x4c\xd9']).hex() == "dd8f4b70b0f4393e889bd39128a30628a78b61816a9eb8199759e7a349657e4800000000000000000000000090f79bf6eb2c4f870365e785982e1f101e93b906000000000000000000000000663f3ad617193148711d28f5334ee4ed07016602000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002dc6c0000000000000000000000000000000000000000000000000000000000000000003c3502d86f21966b48c4c9d22b70395d32b485c6026b345a28d1cb2793d0d89"
+'''Tests to reproduce ethereum cases'''
+c.with_print = False
+# print()
+test_struct = [Hash160Str('0x06b9931e101f2e9885e76503874f2cebf69bf790'), PublicKeyStr.from_ecdsa_verifying_key(vk), Hash160Str('0x02660107ede44e33f5281d7148311917d63a3f66'), 0, 300_0000, 1, 'play', [deployer, 1]]
+test_calldata = b'\x93\xe8\x4c\xd9'
+test_struct_to_verify: bytes = c.invokefunction('structToVerify', [test_struct, test_calldata])
+assert test_struct_to_verify.hex() == "dd8f4b70b0f4393e889bd39128a30628a78b61816a9eb8199759e7a349657e4800000000000000000000000090f79bf6eb2c4f870365e785982e1f101e93b906000000000000000000000000663f3ad617193148711d28f5334ee4ed07016602000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002dc6c0000000000000000000000000000000000000000000000000000000000000000103c3502d86f21966b48c4c9d22b70395d32b485c6026b345a28d1cb2793d0d89"
 assert c.invokefunction('mINIMAL_FORWARDER_TYPE_HASH') == Hash256Str('0x487e6549a3e7599719b89e6a81618ba72806a32891d39b883e39f4b0704b8fdd')
-print()
+# print()
 assert c.invokefunction('dOMAIN_SEPARATOR_TYPE_HASH') == Hash256Str('0x0f40392b525da7a9cafa0f9b177b9f2379cc59f74ccc2e513dfeb89bc6c3738b')
-print(c.invokefunction('hashedName').encode().hex())
+# print('hashedName', c.invokefunction('hashedName'))
 assert c.invokefunction('hashedName') == Hash256Str('0xdc084b50acbdea561bf8b67a3f8c4b7ebf9a4b69fbc9eb8c9a5e519fa323099e')
 assert c.invokefunction('hashedVersion') == Hash256Str('0x851881639119fc8fbdacd9794864879330cf325d45f28042051cf2480b9a20ae')
 assert c.invokefunction('domainSeparatorV4TestAbi').hex() == '8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f9e0923a39f515e9a8cebc9fb694b9abf7e4b8c3f7ab6f81b56eabdac504b08dcae209a0b48f21c054280f2455d32cf309387644879d9acbd8ffc1991638118850000000000000000000000000000000000000000000000000000000000007a690000000000000000000000005fbdb2315678afecb367f032d93f642f64180aa3'
 assert c.invokefunction('domainSeparatorV4') == Hash256Str('0xc7d403ce35603ce8c77b96d1dddddabea40459424cb63e33295e2624b71aa3e7')
+assert c.invokefunction('keccak256', [test_struct_to_verify]) == Hash256Str('0x99ab9f1256cfe9972c33fa05cd1374d4fe0ae119b051c546ea98e6ad61c50b8f'), 'keccak256(test_struct)'
+assert c.invokefunction('dataToVerify', [test_struct, test_calldata]) == Hash256Str('0xbfee5b8b095f81d5f79e947a003791e074a727de60feacab557c1501564e328b'), 'dataToVerify'
 # print(c.invokefunction('abiencode', [Hash160Str('0x06b9931e101f2e9885e76503874f2cebf69bf790'), True]))
 # c.delete_source_code_breakpoints()
 # c.delete_assembly_breakpoints()
