@@ -7,6 +7,10 @@ deployer_WIF_private_key = 'L3v6oswfiUGUuE6HR66VH7KF2A7ipQzBjbHcRC31cbEa5REH5qcY
 deployer_private_key_hex = 'c7cd74e8e38e992611ec457b431b47470007391d1f7e11cc705374688904f5f5'
 deployer_ethereum_mainnet_address = '0x1feB0bD36208145A40dC0A2004e31f094ecFa7E7'
 
+hardhat_private_key_hex = '7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6'
+hardhat_WIF_private_key = 'L1Pm89BJCENjY2Pt5t8pmGxigTZTDFh9YsQdjoodDG7foytkpj4N'
+hardhat_ethereum_address = '0x90F79bf6EB2c4f870365E785982E1f101E93b906'
+
 c = FairyClient(fairy_session='abi-encode', wallet_address_or_scripthash=deployer)
 # keccak_address = c.virutal_deploy_from_path(nef_path_and_filename='../neo-keccak256/Keccak256Contract/bin/sc/Keccak256.nef')
 print(minimal_forwarder_address := c.virutal_deploy_from_path(nef_path_and_filename='../R3E/bin/sc/MinimalForwarder.nef'))
@@ -24,7 +28,11 @@ vk = sk.get_verifying_key()
 
 forward_request = [deployer, PublicKeyStr.from_ecdsa_verifying_key(vk), dice_address, 0, 1000_0000, 1234, 'play', [deployer, 1]]
 print('call data, or req.data:', '0x' + c.invokefunction('callDataToVerify', [forward_request]).hex())
-print(msg_to_sign := c.invokefunction('dataToVerify', [forward_request]))
+msg_to_sign = c.invokefunction('dataToVerify', [forward_request])
+print('msg_to_sign:', msg_to_sign)
+test_struct = [Hash160Str('0x06b9931e101f2e9885e76503874f2cebf69bf790'), PublicKeyStr.from_ecdsa_verifying_key(vk), Hash160Str('0x02660107ede44e33f5281d7148311917d63a3f66'), 0, 300_0000, 1, 'play', [deployer, 1]]
+test_calldata = b'\x93\xe8\x4c\xd9'
+test_msg_to_sign = c.invokefunction('dataToVerify', [test_struct, test_calldata]).to_UInt256()
 msg_to_sign = msg_to_sign.to_UInt256()
 
 '''
@@ -40,7 +48,8 @@ const accounts = await ethereum.request({
 await window.ethereum.request({
   "method": "eth_signTypedData_v4",
   "params": [
-    "0x1feB0bD36208145A40dC0A2004e31f094ecFa7E7",
+    //"0x1feB0bD36208145A40dC0A2004e31f094ecFa7E7",
+    "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
     {
       "types": {
         "EIP712Domain": [
@@ -78,22 +87,40 @@ await window.ethereum.request({
         "verifyingContract": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
       },
       "message": {
-          from: '0x7651a826505c19ca20326381e96b0d5439519a0c',
-          to: '0x37909f174bac07bcf9e5eaedd2158bc46c578e30',
+          from: '0x90F79bf6EB2c4f870365E785982E1f101E93b906',
+          to: '0x663F3ad617193148711d28f5334eE4Ed07016602',
           value: 0,
-          gas: 1000_0000,
-          nonce: 1234,
-          data: '0x40022804706c6179400228140c9a5139540d6be981633220ca195c5026a85176210101'
-      }
+          gas: 3000000,
+          nonce: 1,
+          data: '0x93e84cd9'
+        }
+      //"message": {
+      //    from: '0x7651a826505c19ca20326381e96b0d5439519a0c',
+      //    to: '0x37909f174bac07bcf9e5eaedd2158bc46c578e30',
+      //    value: 0,
+      //    gas: 1000_0000,
+      //    nonce: 1234,
+      //    data: '0x40022804706c6179400228140c9a5139540d6be981633220ca195c5026a85176210101'
+      //}
     }
   ]
 });
 '''
-auto_signature = sk.sign(msg_to_sign)
+auto_signature = sk.sign_digest_deterministic(msg_to_sign, sigencode=ecdsa.util.sigencode_string_canonize)
+auto_signature = sk.sign_digest_deterministic(test_msg_to_sign)
 print('auto_signature:', auto_signature.hex())
 signature = input("Input metamask signature result, or leave this empty and use auto sigs: ")
 # signature = ""
 if signature:
+    from web3 import Web3
+    from hexbytes import HexBytes
+    from eth_account.messages import encode_defunct
+    
+    w3 = Web3(Web3.HTTPProvider(""))
+    mesage = encode_defunct(test_msg_to_sign)
+    address = w3.eth.account.recover_message(mesage, signature=HexBytes(signature))
+    print(address)
+    
     signature = signature.replace("0x", "").replace(r'"', "")
     signature = bytes.fromhex(signature)
     if len(signature) == 65:

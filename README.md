@@ -1,5 +1,7 @@
 # r3e neo contract
 
+TODO: Integrate a safer version of [ecrecover](https://github.com/Hecate2/ECrecover) into Neo for signature verification.
+
 ## 1. Contract Integration
 
 ### 1.1 oracle integration
